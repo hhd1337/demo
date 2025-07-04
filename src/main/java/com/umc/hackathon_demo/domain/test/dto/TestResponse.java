@@ -21,4 +21,11 @@ public class TestResponse {
     public static class ExceptionDTO{
         Integer flag;
     }
+
+    @Getter
+    @AllArgsConstructor
+    public static class ImageUploadResultDTO {
+        private String imageUrl;
+    }
+
 }
