@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 
 @Slf4j
@@ -36,6 +37,16 @@ public class AmazonS3Manager{
         } catch (IOException e) {
             throw new RuntimeException("S3 파일 업로드 실패", e);
         }
+    }
+
+    public String uploadFile(String keyName, File file) {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(file.length());
+        metadata.setContentType("video/mp4"); // mp4로 고정 (또는 동적 처리 가능)
+        metadata.setContentDisposition("inline");
+
+        amazonS3.putObject(new PutObjectRequest(amazonConfig.getBucket(), keyName, file));
+        return amazonS3.getUrl(amazonConfig.getBucket(), keyName).toString();
     }
 
 

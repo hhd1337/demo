@@ -16,5 +16,12 @@ public class Uuid extends BaseEntity {
 
     @Column(unique = true)
     private String uuid;
+
+    public static Uuid create() {
+        return Uuid.builder()
+                .uuid(java.util.UUID.randomUUID().toString())
+                .build();
+    }
 }
+
 
