@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.umc.hackathon_demo.config.AmazonConfig;
+import com.umc.hackathon_demo.entity.Uuid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,15 +23,23 @@ public class AmazonS3Manager{
 
     private final UuidRepository uuidRepository;
 
-    public String uploadFile(String keyName, MultipartFile file){
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(file.getSize());
+    public String uploadFile(String keyName, MultipartFile file) {
         try {
-            amazonS3.putObject(new PutObjectRequest(amazonConfig.getBucket(), keyName, file.getInputStream(), metadata));
-        } catch (IOException e){
-            log.error("error at AmazonS3Manager uploadFile : {}", (Object) e.getStackTrace());
-        }
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(file.getSize());
+            metadata.setContentType(file.getContentType()); // 중요
+            metadata.setContentDisposition("inline"); // 다운로드 방지
 
-        return amazonS3.getUrl(amazonConfig.getBucket(), keyName).toString();
+            amazonS3.putObject(new PutObjectRequest(amazonConfig.getBucket(), keyName, file.getInputStream(), metadata));
+
+            return amazonS3.getUrl(amazonConfig.getBucket(), keyName).toString();
+        } catch (IOException e) {
+            throw new RuntimeException("S3 파일 업로드 실패", e);
+        }
+    }
+
+
+    public String generateTestsKeyName(Uuid uuid) {
+        return amazonConfig.getTestsPath() + '/' + uuid.getUuid();
     }
 }
